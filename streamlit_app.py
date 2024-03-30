@@ -51,7 +51,7 @@ elif option == "URL":
             st.error("Error: Unable to load image from URL. " + str(e))
             # return
 
-ocr_engine = st.sidebar.selectbox("Select OCR Engine", ("Pytesseract"))
+ocr_engine = st.sidebar.selectbox("Select OCR Engine", ("Pytesseract", "Other OCR"))
 
 with st.spinner('Performing OCR...'):
     
