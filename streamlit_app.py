@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 import pytesseract
-from paddleocr import PaddleOCR
+# from paddleocr import PaddleOCR
 import requests
 from io import BytesIO
 import numpy as  np
@@ -12,12 +12,12 @@ def pytesseract_ocr(image):
     text = pytesseract.image_to_string(image)
     return text
 
-def paddleocr_ocr(image_input):
-    ocr = PaddleOCR(use_angle_cls=True, lang='en')
-    result = ocr.ocr(image_input, cls=True)
-    lines = [line[1][0] for line in result[0]]
-    text = '\n'.join(lines)
-    return text
+# def paddleocr_ocr(image_input):
+#     ocr = PaddleOCR(use_angle_cls=True, lang='en')
+#     result = ocr.ocr(image_input, cls=True)
+#     lines = [line[1][0] for line in result[0]]
+#     text = '\n'.join(lines)
+#     return text
 
 def easyocr_ocr(image):
     reader = easyocr.Reader(['en'])
@@ -51,7 +51,7 @@ elif option == "URL":
             st.error("Error: Unable to load image from URL. " + str(e))
             # return
 
-ocr_engine = st.sidebar.selectbox("Select OCR Engine", ("Pytesseract", "PaddleOCR", "EasyOCR"))
+ocr_engine = st.sidebar.selectbox("Select OCR Engine", ("Pytesseract", "EasyOCR"))
 
 with st.spinner('Performing OCR...'):
     
@@ -60,11 +60,11 @@ with st.spinner('Performing OCR...'):
             text = pytesseract_ocr(image)
             st.write("### OCR Result (Pytesseract):")
             st.write(text)
-        elif ocr_engine == "PaddleOCR":
-            image_input = image_url if option == "URL" else np.array(image)
-            text = paddleocr_ocr(image_input)
-            st.write("### OCR Result (PaddleOCR):")
-            st.write(text)
+        # elif ocr_engine == "PaddleOCR":
+        #     image_input = image_url if option == "URL" else np.array(image)
+        #     text = paddleocr_ocr(image_input)
+        #     st.write("### OCR Result (PaddleOCR):")
+        #     st.write(text)
         elif ocr_engine == "EasyOCR":
             text = easyocr_ocr(image)
             st.write("### OCR Result (EasyOCR):")
