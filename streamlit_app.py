@@ -5,7 +5,7 @@ import pytesseract
 import requests
 from io import BytesIO
 import numpy as  np
-import easyocr
+# import easyocr
 
 
 def pytesseract_ocr(image):
@@ -19,12 +19,12 @@ def pytesseract_ocr(image):
 #     text = '\n'.join(lines)
 #     return text
 
-def easyocr_ocr(image):
-    reader = easyocr.Reader(['en'])
-    result = reader.readtext(np.array(image), paragraph="False")
-    lines = [item[1] for item in result]
-    text = '\n'.join(lines)
-    return text
+# def easyocr_ocr(image):
+#     reader = easyocr.Reader(['en'])
+#     result = reader.readtext(np.array(image), paragraph="False")
+#     lines = [item[1] for item in result]
+#     text = '\n'.join(lines)
+#     return text
 
 def load_image_from_url(url):
     response = requests.get(url)
@@ -51,7 +51,7 @@ elif option == "URL":
             st.error("Error: Unable to load image from URL. " + str(e))
             # return
 
-ocr_engine = st.sidebar.selectbox("Select OCR Engine", ("Pytesseract", "EasyOCR"))
+ocr_engine = st.sidebar.selectbox("Select OCR Engine", ("Pytesseract"))
 
 with st.spinner('Performing OCR...'):
     
@@ -65,7 +65,7 @@ with st.spinner('Performing OCR...'):
         #     text = paddleocr_ocr(image_input)
         #     st.write("### OCR Result (PaddleOCR):")
         #     st.write(text)
-        elif ocr_engine == "EasyOCR":
-            text = easyocr_ocr(image)
-            st.write("### OCR Result (EasyOCR):")
-            st.write(text)
+        # elif ocr_engine == "EasyOCR":
+        #     text = easyocr_ocr(image)
+        #     st.write("### OCR Result (EasyOCR):")
+        #     st.write(text)
