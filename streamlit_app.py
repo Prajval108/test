@@ -1,40 +1,71 @@
-import altair as alt
-import numpy as np
-import pandas as pd
 import streamlit as st
+from PIL import Image
+import pytesseract
+from paddleocr import PaddleOCR
+import requests
+from io import BytesIO
+import numpy as  np
+import easyocr
 
-"""
-# Welcome to Streamlit!
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+def pytesseract_ocr(image):
+    text = pytesseract.image_to_string(image)
+    return text
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+def paddleocr_ocr(image_input):
+    ocr = PaddleOCR(use_angle_cls=True, lang='en')
+    result = ocr.ocr(image_input, cls=True)
+    lines = [line[1][0] for line in result[0]]
+    text = '\n'.join(lines)
+    return text
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+def easyocr_ocr(image):
+    reader = easyocr.Reader(['en'])
+    result = reader.readtext(np.array(image), paragraph="False")
+    lines = [item[1] for item in result]
+    text = '\n'.join(lines)
+    return text
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+def load_image_from_url(url):
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    return img
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+st.title("OCR Application")
+option = st.sidebar.radio("Choose Input Option", ("Upload Image", "URL"))
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+image = None 
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+if option == "Upload Image":
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption='Uploaded Image', use_column_width=True)
+elif option == "URL":
+    image_url = st.sidebar.text_input("Enter Image URL:")
+    if image_url:
+        try:
+            image = load_image_from_url(image_url)
+            st.image(image, caption='Image from URL', use_column_width=True)
+        except Exception as e:
+            st.error("Error: Unable to load image from URL. " + str(e))
+            # return
+
+ocr_engine = st.sidebar.selectbox("Select OCR Engine", ("Pytesseract", "PaddleOCR", "EasyOCR"))
+
+with st.spinner('Performing OCR...'):
+    
+    if st.button("Perform OCR") and image:
+        if ocr_engine == "Pytesseract":
+            text = pytesseract_ocr(image)
+            st.write("### OCR Result (Pytesseract):")
+            st.write(text)
+        elif ocr_engine == "PaddleOCR":
+            image_input = image_url if option == "URL" else np.array(image)
+            text = paddleocr_ocr(image_input)
+            st.write("### OCR Result (PaddleOCR):")
+            st.write(text)
+        elif ocr_engine == "EasyOCR":
+            text = easyocr_ocr(image)
+            st.write("### OCR Result (EasyOCR):")
+            st.write(text)
