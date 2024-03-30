@@ -56,7 +56,7 @@ ocr_engine = st.sidebar.selectbox("Select OCR Engine", ("Pytesseract", "Other OC
 with st.spinner('Performing OCR...'):
     
     if st.button("Perform OCR") and image:
-        if ocr_engine == "Pytesseract":
+        # if ocr_engine == "Pytesseract":
             text = pytesseract_ocr(image)
             st.write("### OCR Result (Pytesseract):")
             st.write(text)
